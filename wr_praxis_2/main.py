@@ -33,8 +33,35 @@ def gaussian_elimination(A: np.ndarray, b: np.ndarray, use_pivoting: bool = True
     b = b.copy()
 
     # TODO: Test if shape of matrix and vector is compatible and raise ValueError if not
+    if A.shape[0] != A.shape[1]:
+        raise ValueError('Matrix is not square!')
+    elif A.shape[0] != b.shape[0]:
+        raise ValueError('Matrix and vector size are incompatible!')
 
     # TODO: Perform gaussian elimination
+    i = 0
+    m = b.shape[0]
+
+    while i < m:
+        if A[i, i] == 0:
+            if use_pivoting:
+                # implementation of pivoting
+                column_copy = A[i:m, i:i].copy()
+                max_index = np.abs(column_copy).argmax()
+
+                if column_copy.flat[max_index] == 0:
+                    raise ValueError("System has none or infinite solutions")
+
+                A[[i, max_index]] = A[[max_index, i]]
+            else:
+                raise ValueError("Pivoting is disabled but is required!")
+        else:
+            # implementation of elimination
+            for j in range(i + 1, m):
+                k = A[j, i] / A[i, i]
+                A[j] -= k * A[i]
+                b[j] -= k * b[i]
+            i += 1
 
     return A, b
 
@@ -61,11 +88,27 @@ def back_substitution(A: np.ndarray, b: np.ndarray) -> np.ndarray:
     """
 
     # TODO: Test if shape of matrix and vector is compatible and raise ValueError if not
+    if A.shape[0] != A.shape[1]:
+        raise ValueError('Matrix is not square!')
+    elif A.shape[0] != b.shape[0]:
+        raise ValueError('Matrix and vector size are incompatible!')
 
     # TODO: Initialize solution vector with proper size
-    x = np.zeros(1)
+    m = b.shape[0]
+    x = np.zeros(m)
 
     # TODO: Run backsubstitution and fill solution vector, raise ValueError if no/infinite solutions exist
+    i = m - 1
+
+    while i >= 0:
+        if A[i, i] == 0:
+            raise ValueError("System has none or infinite solutions")
+        else:
+            x[i] = b[i]
+            for j in range(i + 1, m):
+                x[i] -= A[i, j] * x[j]
+            x[i] /= A[i, i]
+            i -= 1
 
     return x
 

@@ -5,7 +5,7 @@ import datetime
 
 import unittest
 import tomograph
-from main import compute_tomograph, gaussian_elimination
+from main import compute_tomograph, gaussian_elimination, back_substitution
 
 
 class Tests(unittest.TestCase):
@@ -18,8 +18,11 @@ class Tests(unittest.TestCase):
         self.assertTrue(np.allclose(A_elim, np.triu(A_elim)))  # Check if matrix is upper triangular
 
     def test_back_substitution(self):
-        pass
-        # TODO
+        A = np.random.randn(4, 4)
+        x = np.random.rand(4)
+        b = np.dot(A, x)
+        A_elim, b_elim = gaussian_elimination(A, b)
+        self.assertTrue(np.allclose(np.linalg.solve(A, b), back_substitution(A_elim, b_elim)))
 
     def test_cholesky_decomposition(self):
         pass
