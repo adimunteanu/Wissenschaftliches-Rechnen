@@ -43,25 +43,27 @@ def gaussian_elimination(A: np.ndarray, b: np.ndarray, use_pivoting: bool = True
     m = b.shape[0]
 
     while i < m:
-        if A[i, i] == 0:
-            if use_pivoting:
-                # implementation of pivoting
-                column_copy = A[i:m, i:i].copy()
-                max_index = np.abs(column_copy).argmax()
+        if use_pivoting:
+            # implementation of pivoting
+            column_copy = A[i:m, i:i + 1].copy()
+            max_index = np.abs(column_copy).argmax()
 
-                if column_copy.flat[max_index] == 0:
-                    raise ValueError("System has none or infinite solutions")
+            if column_copy.flat[max_index] == 0:
+                raise ValueError("System has none or infinite solutions")
 
-                A[[i, max_index]] = A[[max_index, i]]
-            else:
-                raise ValueError("Pivoting is disabled but is required!")
+            if max_index + i != i:
+                A[[i, i + max_index]] = A[[i + max_index, i]]
+                b[[i, i + max_index]] = b[[i + max_index, i]]
         else:
-            # implementation of elimination
-            for j in range(i + 1, m):
-                k = A[j, i] / A[i, i]
-                A[j] -= k * A[i]
-                b[j] -= k * b[i]
-            i += 1
+            if A[i, i] == 0:
+                raise ValueError("Pivoting is disabled but is required!")
+
+        # implementation of elimination
+        for j in range(i + 1, m):
+            k = A[j, i] / A[i, i]
+            A[j] = A[j] - k * A[i]
+            b[j] = b[j] - k * b[i]
+        i += 1
 
     return A, b
 

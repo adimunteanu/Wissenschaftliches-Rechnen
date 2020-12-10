@@ -17,6 +17,24 @@ class Tests(unittest.TestCase):
         self.assertTrue(np.allclose(np.linalg.solve(A_elim, b_elim), x))  # Check if system is still solvable
         self.assertTrue(np.allclose(A_elim, np.triu(A_elim)))  # Check if matrix is upper triangular
 
+        # Pivot required
+        A = np.array([[0, 1], [1, 0]])
+        x = np.array([0, 1])
+        b = np.dot(A, x)
+        A_elim, b_elim = gaussian_elimination(A, b)
+        print(A_elim)
+        print(b_elim)
+        self.assertTrue(np.allclose(np.linalg.solve(A_elim, b_elim), x))  # Check if system is still solvable
+
+        A = np.array([[0, 2, 2], [1, 3, 2], [3, 3, 3]])
+        b = np.array([3, 2, 3])
+        x = np.linalg.solve(A, b);
+        A_elim, b_elim = gaussian_elimination(A, b)
+        print(A_elim)
+        print(b_elim)
+        self.assertTrue(np.allclose(np.linalg.solve(A_elim, b_elim), x))  # Check if system is still solvable
+
+
     def test_back_substitution(self):
         A = np.random.randn(4, 4)
         x = np.random.rand(4)
