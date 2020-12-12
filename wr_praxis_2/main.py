@@ -248,20 +248,33 @@ def setup_system_tomograph(n_shots: np.int, n_rays: np.int, n_grid: np.int) -> (
     """
 
     # TODO: Initialize system matrix with proper size
-    L = np.zeros((1, 1))
+    L = np.zeros((n_shots * n_rays, n_grid * n_grid))
     # TODO: Initialize intensity vector
-    g = np.zeros(1)
+    g = np.zeros(n_shots * n_rays)
 
     # TODO: Iterate over equispaced angles, take measurements, and update system matrix and sinogram
     theta = 0
-    # Take a measurement with the tomograph from direction r_theta.
-    # intensities: measured intensities for all <n_rays> rays of the measurement. intensities[n] contains the intensity for the n-th ray
-    # ray_indices: indices of rays that intersect a cell
-    # isect_indices: indices of intersected cells
-    # lengths: lengths of segments in intersected cells
-    # The tuple (ray_indices[n], isect_indices[n], lengths[n]) stores which ray has intersected which cell with which length. n runs from 0 to the amount of ray/cell intersections (-1) of this measurement.
-    intensities, ray_indices, isect_indices, lengths = tomograph.take_measurement(n_grid, n_rays, theta)
+    theta_increment = np.pi / n_shots
 
+    for i in range(0, n_shots):
+        # Take a measurement with the tomograph from direction r_theta.
+        # intensities: measured intensities for all <n_rays> rays of the measurement. intensities[n] contains the
+        # intensity for the n-th ray
+        # ray_indices: indices of rays that intersect a cell
+        # isect_indices: indices of intersected cells
+        # lengths: lengths of segments in intersected cells
+        # The tuple (ray_indices[n], isect_indices[n], lengths[n]) stores which ray has intersected which cell with
+        # which length. n runs from 0 to the amount of ray/cell intersections (-1) of this measurement.
+        intensities, ray_indices, isect_indices, lengths = tomograph.take_measurement(n_grid, n_rays, theta)
+        theta += theta_increment
+
+        offset = i * n_rays
+
+        for j in range(0, n_rays):
+            g[j + offset] = intensities[j]
+
+        for j in range(0, len(ray_indices)):
+            L[ray_indices[j] + offset, isect_indices[j]] = lengths[j]
 
     return [L, g]
 
@@ -293,8 +306,13 @@ def compute_tomograph(n_shots: np.int, n_rays: np.int, n_grid: np.int) -> np.nda
     # TODO: Solve for tomographic image using your Cholesky solver
     # (alternatively use Numpy's Cholesky implementation)
 
+    A_t_A = np.dot(L.T, L)
+    A_t_b = np.dot(L.T, g)
+    #c = solve_cholesky(compute_cholesky(A_t_A), A_t_b)
+    c = solve_cholesky(np.linalg.cholesky(A_t_A), A_t_b)
+
     # TODO: Convert solution of linear system to 2D image
-    tim = np.zeros((n_grid, n_grid))
+    tim = np.reshape(c, (n_grid, n_grid))
 
     return tim
 
