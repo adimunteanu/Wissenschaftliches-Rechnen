@@ -194,13 +194,31 @@ def solve_cholesky(L: np.ndarray, b: np.ndarray) -> np.ndarray:
 
     # TODO Check the input for validity, raising a ValueError if this is not the case
     (n, m) = L.shape
+    if n != m:
+        raise ValueError("Matrix isn't quadratic!")
 
+    p = b.shape[0]
+    if n != p:
+        raise ValueError("Dimensions of L and b don't match!")
+
+    if not np.allclose(L, np.tril(L)):
+        raise ValueError("L is not a lower triangular matrix!")
 
     # TODO Solve the system by forward- and backsubstitution
-    x = np.zeros(m)
+    y = np.zeros(n)
 
+    # forward substitution
+    for i in range(0, n):
+        if L[i, i] == 0:
+            raise ValueError("Infinite or no solutions")
+        else:
+            y[i] = b[i]
+            for j in range(0, i):
+                y[i] -= L[i, j] * y[j]
+            y[i] /= L[i, i]
 
-    return x
+    # back substitution
+    return back_substitution(L.T, y)
 
 
 ####################################################################################################

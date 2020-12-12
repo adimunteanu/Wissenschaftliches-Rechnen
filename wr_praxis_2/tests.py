@@ -5,7 +5,7 @@ import datetime
 
 import unittest
 import tomograph
-from main import compute_tomograph, gaussian_elimination, back_substitution, compute_cholesky
+from main import compute_tomograph, gaussian_elimination, back_substitution, compute_cholesky, solve_cholesky
 
 
 class Tests(unittest.TestCase):
@@ -48,8 +48,12 @@ class Tests(unittest.TestCase):
         self.assertTrue(np.allclose(np.linalg.cholesky(M), compute_cholesky(M)))
 
     def test_solve_cholesky(self):
-        pass
-        # TODO
+        A = np.random.randn(4, 4)
+        M = np.dot(A, A.transpose())
+        x = np.random.randn(4)
+        b = np.dot(M, x)
+        L = np.linalg.cholesky(M)
+        self.assertTrue(np.allclose(np.linalg.solve(M, b), solve_cholesky(L, b)))
 
     def test_compute_tomograph(self):
         t = datetime.datetime.now()
