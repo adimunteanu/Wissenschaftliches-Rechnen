@@ -137,13 +137,38 @@ def compute_cholesky(M: np.ndarray) -> np.ndarray:
 
     # TODO check for symmetry and raise an exception of type ValueError
     (n, m) = M.shape
+    if n != m:
+        raise ValueError("Matrix is not quadratic!")
 
+    if not np.allclose(M, M.T, rtol=1e-05, atol=1e-08):
+        raise ValueError("Matrix is not symmetric!")
 
 
     # TODO build the factorization and raise a ValueError in case of a non-positive definite input matrix
 
     L = np.zeros((n, n))
 
+    for i in range(0, n):
+        for j in range(0, i + 1):
+            if i == j: # diagonal element calculation
+                quadratic_sum = 0
+                for k in range(0, i):
+                    quadratic_sum += L[i, k] * L[i, k]
+                L[i, i] = M[i, i] - quadratic_sum
+
+                if L[i, i] < 0:
+                    raise ValueError("Matrix is not PSD")
+
+                L[i, i] = np.sqrt(L[i, i])
+            else: # other elements calculation
+                if L[j, j] == 0:
+                    raise ValueError("Matrix is not PSD")
+
+                produkt_sum = 0
+                for k in range(0, j):
+                    produkt_sum += L[i, k] * L[j, k]
+
+                L[i, j] = (M[i, j] - produkt_sum) / L[j, j]
 
     return L
 

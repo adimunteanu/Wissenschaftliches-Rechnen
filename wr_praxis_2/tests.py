@@ -5,7 +5,7 @@ import datetime
 
 import unittest
 import tomograph
-from main import compute_tomograph, gaussian_elimination, back_substitution
+from main import compute_tomograph, gaussian_elimination, back_substitution, compute_cholesky
 
 
 class Tests(unittest.TestCase):
@@ -43,8 +43,9 @@ class Tests(unittest.TestCase):
         self.assertTrue(np.allclose(np.linalg.solve(A, b), back_substitution(A_elim, b_elim)))
 
     def test_cholesky_decomposition(self):
-        pass
-        # TODO
+        A = np.random.randn(4, 4)
+        M = np.dot(A, A.transpose())
+        self.assertTrue(np.allclose(np.linalg.cholesky(M), compute_cholesky(M)))
 
     def test_solve_cholesky(self):
         pass
