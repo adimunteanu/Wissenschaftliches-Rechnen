@@ -43,8 +43,10 @@ class Tests(unittest.TestCase):
         self.assertTrue(np.allclose(np.linalg.solve(A, b), back_substitution(A_elim, b_elim)))
 
     def test_cholesky_decomposition(self):
-        A = np.random.randn(4, 4)
-        M = np.dot(A, A.transpose())
+        # A = np.random.randn(4, 4)
+        #
+        # M = np.dot(A, A.transpose())
+        M = np.array([[5, 5, 5], [5, 5, 5], [5, 5, 5]])
         self.assertTrue(np.allclose(np.linalg.cholesky(M), compute_cholesky(M)))
 
     def test_solve_cholesky(self):
