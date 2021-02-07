@@ -36,8 +36,6 @@ def lagrange_interpolation(x: np.ndarray, y: np.ndarray) -> (np.poly1d, list):
     return polynomial, base_functions
 
 
-
-
 def hermite_cubic_interpolation(x: np.ndarray, y: np.ndarray, yp: np.ndarray) -> list:
     """
     Compute hermite cubic interpolation spline
@@ -58,19 +56,18 @@ def hermite_cubic_interpolation(x: np.ndarray, y: np.ndarray, yp: np.ndarray) ->
 
     for i in range(n - 1):
         L = np.zeros((4, 4))
-        L[0] = [1, x[i], x[i]**2, x[i]**3]
-        L[1] = [1, x[i+1], x[i+1]**2, x[i+1]**3]
-        L[2] = [0, 1, 2 * x[i], 3 * x[i]**2]
-        L[3] = [0, 1, 2 * x[i+1], 3 * x[i+1]**2]
+        L[0] = [1, x[i], x[i] ** 2, x[i] ** 3]
+        L[1] = [1, x[i + 1], x[i + 1] ** 2, x[i + 1] ** 3]
+        L[2] = [0, 1, 2 * x[i], 3 * x[i] ** 2]
+        L[3] = [0, 1, 2 * x[i + 1], 3 * x[i + 1] ** 2]
 
-        f = np.array([y[i], y[i+1], yp[i], yp[i+1]])
+        f = np.array([y[i], y[i + 1], yp[i], yp[i + 1]])
 
         c = np.linalg.solve(L, f)
         c = np.flipud(c)
         spline.append(np.poly1d(c))
 
     return spline
-
 
 
 ####################################################################################################
@@ -95,62 +92,80 @@ def natural_cubic_interpolation(x: np.ndarray, y: np.ndarray) -> list:
     V = np.zeros((4 * n - 4, 4 * n - 4))
     f = np.zeros(4 * n - 4)
 
-    for i in range(n):
-        if i == 0:
-            # first row
-            V[0, 0] = 1
-            V[0, 1] = x[i]
-            V[0, 2] = x[i]**2
-            V[0, 3] = x[i]**3
-            # second last row
-            V[4 * n - 6, 2] = 2
-            V[4 * n - 6, 3] = 6 * x[i]
+    def function_name(i, j):
+        return x[i] ** j
 
-            f[0] = y[0]
-        elif i == n - 1:
-            # third last row
-            V[4 * n - 7, 4 * n - 8] = 1
-            V[4 * n - 7, 4 * n - 7] = x[i]
-            V[4 * n - 7, 4 * n - 6] = x[i]**2
-            V[4 * n - 7, 4 * n - 5] = x[i]**3
+    def first_derivate(i, j):
+        return j * x[i + 1] ** (j - 1)
 
-            # last row
-            V[4 * n - 5, 4 * n - 6] = 2
-            V[4 * n - 5, 4 * n - 5] = 6 * x[i]
+    for i in range(n - 1):
+        V[4 * i, (i * 4):((i + 1) * 4)], f[4 * i] = np.array([function_name(i, j) for j in range(4)]), y[i]
+        V[4 * i + 1, (i * 4):((i + 1) * 4)], f[4 * i] = np.array([function_name(i + 1, j) for j in range(4)]), y[i + 1]
+        if i > 0:
+            V[4 * i + 2, (i * 4):((i + 1) * 4)] = np.array([first_derivate(i, j) for j in range(4)])
+            V[4 * i + 2, ((i + 1) * 4):((i + 2) * 4)] = - V[4 * i + 2, (i * 4):((i + 1) * 4)]
+            V[4 * i + 3, (i * 4):((i + 1) * 4)] = np.array([(j - 1) * j * x[i + 1] ** (j - 2) for j in range(4)])
+            V[4 * i + 3, ((i + 1) * 4):((i + 2) * 4)] = - V[4 * i + 3, (i * 4):((i + 1) * 4)]
+    for j in range(4):
+        V[4 * (n - 2) + 2, j] = (j - 1) * j * x[0] ** (j - 2)
+        V[4 * (n - 2) + 3, j + (n - 2) * 4] = (j - 1) * j * x[0] ** (j - 2)
 
-            f[4 * n - 7] = y[n - 1]
-        else:
-            V[4 * (i - 1) + 1, 4 * (i - 1)] = 1
-            V[4 * (i - 1) + 1, 4 * (i - 1) + 1] = x[i]
-            V[4 * (i - 1) + 1, 4 * (i - 1) + 2] = x[i]**2
-            V[4 * (i - 1) + 1, 4 * (i - 1) + 3] = x[i]**3
 
-            V[4 * (i - 1) + 2, 4 * (i - 1)] = 0
-            V[4 * (i - 1) + 2, 4 * (i - 1) + 1] = 1
-            V[4 * (i - 1) + 2, 4 * (i - 1) + 2] = 2 * x[i]
-            V[4 * (i - 1) + 2, 4 * (i - 1) + 3] = 3 * x[i]**2
-            V[4 * (i - 1) + 2, 4 * (i - 1) + 4] = 0
-            V[4 * (i - 1) + 2, 4 * (i - 1) + 5] = -1
-            V[4 * (i - 1) + 2, 4 * (i - 1) + 6] = -2 * x[i]
-            V[4 * (i - 1) + 2, 4 * (i - 1) + 7] = -3 * x[i]**2
-
-            V[4 * (i - 1) + 3, 4 * (i - 1)] = 0
-            V[4 * (i - 1) + 3, 4 * (i - 1) + 1] = 0
-            V[4 * (i - 1) + 3, 4 * (i - 1) + 2] = 2
-            V[4 * (i - 1) + 3, 4 * (i - 1) + 3] = 6 * x[i]
-            V[4 * (i - 1) + 3, 4 * (i - 1) + 4] = 0
-            V[4 * (i - 1) + 3, 4 * (i - 1) + 5] = 0
-            V[4 * (i - 1) + 3, 4 * (i - 1) + 6] = -2
-            V[4 * (i - 1) + 3, 4 * (i - 1) + 7] = -6 * x[i]
-
-            V[4 * (i - 1) + 4, 4 * i] = 1
-            V[4 * (i - 1) + 4, 4 * i + 1] = x[i]
-            V[4 * (i - 1) + 4, 4 * i + 2] = x[i]**2
-            V[4 * (i - 1) + 4, 4 * i + 3] = x[i]**3
-
-            f[4 * (i - 1) + 1] = y[i]
-            f[4 * (i - 1) + 4] = y[i]
-
+    # for i in range(n):
+    #     if i == 0:
+    #         # first row
+    #         V[0, 0] = 1
+    #         V[0, 1] = x[i]
+    #         V[0, 2] = x[i] ** 2
+    #         V[0, 3] = x[i] ** 3
+    #         # second last row
+    #         V[4 * n - 6, 2] = 2
+    #         V[4 * n - 6, 3] = 6 * x[i]
+    #
+    #         f[0] = y[0]
+    #     elif i == n - 1:
+    #         # third last row
+    #         V[4 * n - 7, 4 * n - 8] = 1
+    #         V[4 * n - 7, 4 * n - 7] = x[i]
+    #         V[4 * n - 7, 4 * n - 6] = x[i] ** 2
+    #         V[4 * n - 7, 4 * n - 5] = x[i] ** 3
+    #
+    #         # last row
+    #         V[4 * n - 5, 4 * n - 6] = 2
+    #         V[4 * n - 5, 4 * n - 5] = 6 * x[i]
+    #
+    #         f[4 * n - 7] = y[n - 1]
+    #     else:
+    #         V[4 * (i - 1) + 1, 4 * (i - 1)] = 1
+    #         V[4 * (i - 1) + 1, 4 * (i - 1) + 1] = x[i]
+    #         V[4 * (i - 1) + 1, 4 * (i - 1) + 2] = x[i] ** 2
+    #         V[4 * (i - 1) + 1, 4 * (i - 1) + 3] = x[i] ** 3
+    #
+    #         V[4 * (i - 1) + 2, 4 * (i - 1)] = 0
+    #         V[4 * (i - 1) + 2, 4 * (i - 1) + 1] = 1
+    #         V[4 * (i - 1) + 2, 4 * (i - 1) + 2] = 2 * x[i]
+    #         V[4 * (i - 1) + 2, 4 * (i - 1) + 3] = 3 * x[i] ** 2
+    #         V[4 * (i - 1) + 2, 4 * (i - 1) + 4] = 0
+    #         V[4 * (i - 1) + 2, 4 * (i - 1) + 5] = -1
+    #         V[4 * (i - 1) + 2, 4 * (i - 1) + 6] = -2 * x[i]
+    #         V[4 * (i - 1) + 2, 4 * (i - 1) + 7] = -3 * x[i] ** 2
+    #
+    #         V[4 * (i - 1) + 3, 4 * (i - 1)] = 0
+    #         V[4 * (i - 1) + 3, 4 * (i - 1) + 1] = 0
+    #         V[4 * (i - 1) + 3, 4 * (i - 1) + 2] = 2
+    #         V[4 * (i - 1) + 3, 4 * (i - 1) + 3] = 6 * x[i]
+    #         V[4 * (i - 1) + 3, 4 * (i - 1) + 4] = 0
+    #         V[4 * (i - 1) + 3, 4 * (i - 1) + 5] = 0
+    #         V[4 * (i - 1) + 3, 4 * (i - 1) + 6] = -2
+    #         V[4 * (i - 1) + 3, 4 * (i - 1) + 7] = -6 * x[i]
+    #
+    #         V[4 * (i - 1) + 4, 4 * i] = 1
+    #         V[4 * (i - 1) + 4, 4 * i + 1] = x[i]
+    #         V[4 * (i - 1) + 4, 4 * i + 2] = x[i] ** 2
+    #         V[4 * (i - 1) + 4, 4 * i + 3] = x[i] ** 3
+    #
+    #         f[4 * (i - 1) + 1] = y[i]
+    #         f[4 * (i - 1) + 4] = y[i]
 
     # TODO solve linear system for the coefficients of the spline
     c = np.linalg.solve(V, f)
@@ -193,7 +208,7 @@ def periodic_cubic_interpolation(x: np.ndarray, y: np.ndarray) -> list:
             V[4 * n - 6, 0] = 0
             V[4 * n - 6, 1] = 1
             V[4 * n - 6, 2] = 2 * x[i]
-            V[4 * n - 6, 3] = 3 * x[i]**2
+            V[4 * n - 6, 3] = 3 * x[i] ** 2
 
             # last row
             V[4 * n - 5, 0] = 0
@@ -201,20 +216,19 @@ def periodic_cubic_interpolation(x: np.ndarray, y: np.ndarray) -> list:
             V[4 * n - 5, 2] = 2
             V[4 * n - 5, 3] = 6 * x[i]
 
-
             f[0] = y[0]
         elif i == n - 1:
             # third last row
             V[4 * n - 7, 4 * n - 8] = 1
             V[4 * n - 7, 4 * n - 7] = x[i]
-            V[4 * n - 7, 4 * n - 6] = x[i]**2
-            V[4 * n - 7, 4 * n - 5] = x[i]**3
+            V[4 * n - 7, 4 * n - 6] = x[i] ** 2
+            V[4 * n - 7, 4 * n - 5] = x[i] ** 3
 
             # second last row
             V[4 * n - 6, 4 * n - 8] = 0
             V[4 * n - 6, 4 * n - 7] = -1
             V[4 * n - 6, 4 * n - 6] = -2 * x[i]
-            V[4 * n - 6, 4 * n - 5] = -3 * x[i]**2
+            V[4 * n - 6, 4 * n - 5] = -3 * x[i] ** 2
 
             # last row
             V[4 * n - 5, 4 * n - 8] = 0
@@ -267,7 +281,6 @@ def periodic_cubic_interpolation(x: np.ndarray, y: np.ndarray) -> list:
 
 
 if __name__ == '__main__':
-
     print("All requested functions for the assignment have to be implemented in this file and uploaded to the "
           "server for the grading.\nTo test your implemented functions you can "
           "implement/run tests in the file tests.py (> python3 -v test.py [Tests.<test_function>]).")
