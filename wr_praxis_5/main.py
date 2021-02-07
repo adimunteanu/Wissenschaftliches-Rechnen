@@ -16,15 +16,19 @@ def dft_matrix(n: int) -> np.ndarray:
     Forbidden:
     - numpy.fft.*
     """
-    # TODO: initialize matrix with proper size
-    F = np.zeros((1, 1), dtype='complex128')
+    # initialize matrix with proper size
+    F = np.zeros((n, n), dtype='complex128')
 
-    # TODO: create principal term for DFT matrix
+    # create principal term for DFT matrix
+    omega_lul = np.exp(-2 * np.pi * 1j / n)
 
-    # TODO: fill matrix with values
+    # fill matrix with values
+    for i in range(n):
+        for j in range(n):
+            F[i, j] = omega_lul**(i * j)
 
-    # TODO: normalize dft matrix
-
+    # normalize dft matrix
+    F /= np.sqrt(n)
 
     return F
 
