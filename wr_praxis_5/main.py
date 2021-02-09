@@ -44,7 +44,10 @@ def is_unitary(matrix: np.ndarray) -> bool:
     unitary: True if the matrix is unitary
     """
     unitary = True
-    # TODO: check that F is unitary, if not return false
+
+    # check that F is unitary, if not return false
+    matrix_conjugate_transpose = np.transpose(np.conjugate(matrix))
+    unitary = np.allclose(matrix_conjugate_transpose.dot(matrix), np.eye(matrix.shape[0]))
 
     return unitary
 
@@ -66,7 +69,17 @@ def create_harmonics(n: int = 128) -> (list, list):
     # Fourier-transformed signals
     fsigs = []
 
-    # TODO: create signals and extract harmonics out of DFT matrix
+    # create signals and extract harmonics out of DFT matrix
+    for i in range(n):
+        s = np.zeros(n)
+        s[i] = 1
+        sigs.append(s)
+
+    F = dft_matrix(n)
+
+    for i in range(n):
+        fs = F.dot(sigs[i])
+        fsigs.append(fs)
 
     return sigs, fsigs
 
@@ -85,8 +98,21 @@ def shuffle_bit_reversed_order(data: np.ndarray) -> np.ndarray:
     data: shuffled data array
     """
 
-    # TODO: implement shuffling by reversing index bits
-    
+    # implement shuffling by reversing index bits
+    n = data.shape[0]
+
+    binary_size = int(np.log2(n))
+    reversed_indices_data = np.asarray(data, dtype='complex128')
+
+    for i in range(n):
+        index_b = bin(i)
+        reversed_index_b = index_b[-1:1:-1]
+        reversed_index_b = reversed_index_b + (binary_size - len(reversed_index_b)) * '0'
+        reversed_index = int(reversed_index_b, 2)
+        reversed_indices_data[reversed_index] = data[i]
+
+    data = reversed_indices_data
+
     return data
 
 
@@ -115,12 +141,21 @@ def fft(data: np.ndarray) -> np.ndarray:
     if not n > 0 or (n & (n - 1)) != 0:
         raise ValueError
 
-    # TODO: first step of FFT: shuffle data
+    # first step of FFT: shuffle data
+    fdata = np.asarray(shuffle_bit_reversed_order(data), dtype='complex128')
 
+    # second step, recursively merge transforms
+    for m in range(int(np.log2(n))):
+        for k in range(2**m):
+            omega_lul = np.exp(-2 * np.pi * 1j * k / (2**(m+1)))
+            for i in range(k, n, 2**(m+1)):
+                j = i + 2**m
+                p = omega_lul * fdata[j]
+                fdata[j] = fdata[i] - p
+                fdata[i] = fdata[i] + p
 
-    # TODO: second step, recursively merge transforms
-
-    # TODO: normalize fft signal
+    # normalize fft signal
+    fdata /= np.sqrt(n)
 
     return fdata
 
