@@ -158,7 +158,16 @@ def surface_area(v: np.ndarray, f: np.ndarray) -> float:
     # initialize area
     area = 0.0
     
-    # TODO: iterate over all triangles and sum up their area
+    # iterate over all triangles and sum up their area
+    for i in range(f.shape[0]):
+        x = v[f[i][0]]
+        y = v[f[i][1]]
+        z = v[f[i][2]]
+        xy = np.abs(np.linalg.norm(x - y))
+        yz = np.abs(np.linalg.norm(y - z))
+        zx = np.abs(np.linalg.norm(z - x))
+        p = (xy + yz + zx) / 2
+        area += (p * (p - xy) * (p - yz) * (p - zx)) ** 0.5
     
     return area
 
