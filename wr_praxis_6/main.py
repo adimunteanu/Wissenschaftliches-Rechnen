@@ -124,15 +124,18 @@ def generate_newton_fractal(f: object, df: object, roots: np.ndarray, sampling: 
 
     result = np.zeros((sampling.shape[0], sampling.shape[1], 2), dtype=int)
 
-    # TODO: iterate over sampling grid
+    # iterate over sampling grid
+    for i in range(sampling.shape[0]):
+        for j in range(sampling.shape[1]):
+            # run Newton iteration to find a root and the iterations for the sample (in maximum n_iters_max iterations)
+            found_root, n_iters = find_root_newton(f, df, sampling[i, j], n_iters_max)
+            # determine the index of the closest root from the roots array. The functions np.argmin and np.tile could be helpful.
+            roots_copy = np.tile(roots, 1)
+            roots_copy = abs(roots_copy - found_root)
+            index = np.argmin(roots_copy)
 
-            # TODO: run Newton iteration to find a root and the iterations for the sample (in maximum n_iters_max iterations)
-
-            # TODO: determine the index of the closest root from the roots array. The functions np.argmin and np.tile could be helpful.
-            # index = 0
-
-            # TODO: write the index and the number of needed iterations to the result
-            # result[i, j] = np.array([index, n_iters_max+1])
+            # write the index and the number of needed iterations to the result
+            result[i, j] = np.array([index, n_iters])
 
     return result
 
