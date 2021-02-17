@@ -143,7 +143,7 @@ def fft(data: np.ndarray) -> np.ndarray:
 
     # first step of FFT: shuffle data
     fdata = np.asarray(shuffle_bit_reversed_order(data), dtype='complex128')
-
+    print(fdata)
     # second step, recursively merge transforms
     for m in range(int(np.log2(n))):
         for k in range(2**m):
@@ -153,6 +153,7 @@ def fft(data: np.ndarray) -> np.ndarray:
                 p = omega_lul * fdata[j]
                 fdata[j] = fdata[i] - p
                 fdata[i] = fdata[i] + p
+        print(fdata)
 
     # normalize fft signal
     fdata /= np.sqrt(n)
@@ -177,7 +178,10 @@ def generate_tone(f: float = 261.626, num_samples: int = 44100) -> np.ndarray:
 
     data = np.zeros(num_samples)
 
-    # TODO: Generate sine wave with proper frequency
+    # Generate sine wave with proper frequency
+    samples = np.arange(x_min, x_max, x_max / (num_samples - 1))
+    samples = np.append(samples, [1.0])
+    data = np.sin(2 * np.pi * f * samples)
 
     return data
 
@@ -199,11 +203,13 @@ def low_pass_filter(adata: np.ndarray, bandlimit: int = 1000, sampling_rate: int
     bandlimit_index = int(bandlimit*adata.size/sampling_rate)
 
     # TODO: compute Fourier transform of input data
+    f = np.fft.fft(adata)
 
     # TODO: set high frequencies above bandlimit to zero, make sure the almost symmetry of the transform is respected.
 
     # TODO: compute inverse transform and extract real component
     adata_filtered = np.zeros(adata.shape[0])
+    adata_filtered = np.real(np.fft.ifft(adata))
 
     return adata_filtered
 
