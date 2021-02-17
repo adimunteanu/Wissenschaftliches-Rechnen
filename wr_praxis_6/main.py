@@ -22,7 +22,9 @@ def find_root_bisection(f: object, lival: np.floating, rival: np.floating, ival_
     assert (n_iters_max > 0)
     assert (rival > lival)
 
-    # TODO: set meaningful minimal interval size if not given as parameter, e.g. 10 * eps
+    # set meaningful minimal interval size if not given as parameter, e.g. 10 * eps
+    if ival_size == -1:
+        np.finfo(np.float64).eps * 10
 
     # intialize iteration
     fl = f(lival)
@@ -32,11 +34,27 @@ def find_root_bisection(f: object, lival: np.floating, rival: np.floating, ival_
     assert (not ((fl > 0.0 and fr > 0.0) or (fl < 0.0 and fr < 0.0)))
 
     n_iterations = 0
-    # TODO: loop until final interval is found, stop if max iterations are reached
+    # loop until final interval is found, stop if max iterations are reached
+    while (np.abs(lival - rival) > ival_size) and (n_iterations < 256):
+        x = (lival + rival) / 2
+        func_val_x = f(x)
 
+        if func_val_x < 0:
+            if fl < 0:
+                lival = x
+            else:
+                rival = x
+        else:
+            if fl < 0:
+                rival = x
+            else:
+                lival = x
 
-    # TODO: calculate final approximation to root
-    root = np.float64(0.0)
+        fl = f(lival)
+        n_iterations += 1
+
+    # calculate final approximation to root
+    root = np.float64(lival)
 
     return root
 
