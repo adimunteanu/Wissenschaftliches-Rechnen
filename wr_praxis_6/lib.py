@@ -137,7 +137,7 @@ def prepare_visualization(v, f):
     norm = lambda x: x
     ax = fig.gca(projection='3d')
     limits = (np.min(v[:, 0]), np.max(v[:, 0]), np.min(v[:, 1]), np.max(v[:, 1]), np.min(v[:, 2]), np.max(v[:, 2]))
-    surf = ax.plot_trisurf(v[:, 0], v[:, 1], v[:, 2], triangles=f, cmap=cmap, linewidth=0.1, norm=norm, shade=False,
+    surf = ax.plot_trisurf(v[:, 0], v[:, 1], v[:, 2], triangles=f, cmap=cmap, linewidth=0.1, shade=False,
                            alpha=0.8)
     ax.set_xlim3d(limits[0], limits[1])
     ax.set_ylim3d(limits[2], limits[3])
@@ -151,7 +151,7 @@ def update_visualization(v, f, abs_gradient, limits, ax, normalize=False):
         abs_gradient = abs_gradient / abs_gradient.max()
     cmap = plt.get_cmap('Blues')
     norm = lambda x: x
-    surf = ax.plot_trisurf(v[:, 0], v[:, 1], v[:, 2], triangles=f, cmap=cmap, linewidth=0.1, norm=norm,
+    surf = ax.plot_trisurf(v[:, 0], v[:, 1], v[:, 2], triangles=f, cmap=cmap, linewidth=0.1,
                            shade=False, alpha=0.8)
     surf.set_array(abs_gradient)
     ax.set_xlim3d(limits[0], limits[1])

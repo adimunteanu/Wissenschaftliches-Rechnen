@@ -84,12 +84,6 @@ class Tests(unittest.TestCase):
         gradient = gradient / np.linalg.norm(gradient)
         reference = self.data["gradient"].flatten()
         reference = reference / np.linalg.norm(reference)
-        right_grad = 0
-        for i in range(gradient.shape[0]):
-            print(gradient[i], " ", reference[i])
-            if gradient[i] == reference[i]:
-                right_grad += 1
-        print(right_grad)
         self.assertTrue(np.allclose(reference, gradient))
         
     def test_6_gradient_descent_step(self):
