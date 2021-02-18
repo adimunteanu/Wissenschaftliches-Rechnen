@@ -187,7 +187,26 @@ def surface_area_gradient(v: np.ndarray, f: np.ndarray) -> np.ndarray:
     # intialize the gradient
     gradient = np.zeros(v.shape)
     
-    # TODO: iterate over all triangles and sum up the vertices gradients
+    # iterate over all triangles and sum up the vertices gradients
+    for i in range(f.shape[0]):
+        x0 = v[f[i, 0]]
+        x1 = v[f[i, 1]]
+        x2 = v[f[i, 2]]
+
+        x1x2 = x1 - x2
+        x0x2 = x0 - x2
+        n0 = np.cross(x1x2, x0x2) / np.linalg.norm(np.cross(x1x2, x0x2))
+        gradient[f[i, 0]] -= np.cross(n0, x1x2)
+
+        x2x0 = x2 - x0
+        x1x0 = x1 - x0
+        n1 = np.cross(x2x0, x1x0) / np.linalg.norm(np.cross(x2x0, x1x0))
+        gradient[f[i, 1]] -= np.cross(n1, x2x0)
+
+        x0x1 = x0 - x1
+        x2x1 = x2 - x1
+        n2 = np.cross(x0x1, x2x1) / np.linalg.norm(np.cross(x0x1, x2x1))
+        gradient[f[i, 2]] -= np.cross(n2, x0x1)
     
     return gradient
 
