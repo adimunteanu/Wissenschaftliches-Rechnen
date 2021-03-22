@@ -35,11 +35,13 @@ class Tests(unittest.TestCase):
         plt.show()
 
     def test_2_find_root_newton(self):
-        x0, i0 = find_root_newton(lambda x: x ** 2 - 2, lambda x: 2 * x, np.float64(10.0))
-        x1, i1 = find_root_newton(lambda x: x ** 2 - 2, lambda x: 2 * x, np.float64(5.0))
-        x2, i2 = find_root_newton(lambda x: x ** 2 - 2, lambda x: 2 * x, np.float64(0.1))
-        self.assertTrue(np.allclose(np.array([x0, x1, x2]), np.array([np.sqrt(2)] * 3)))
+        # i2 = find_root_newton(lambda x: x ** 2 - 2, lambda x: 2 * x, np.float64(0.1))
+        x3, i3 = find_root_newton(lambda x: x ** 3 - 2 * x + 2, lambda x : 3 * x ** 2 - 2, np.float(1))
 
+        # x3, i3 = find_root_newton(lambda x: (6 * x) / (x ** 2 + 1), lambda x: -6 * (x ** 2 - 1) / ((x ** 2 + 1) ** 2), np.float(1.0))
+        print(x3, i3)
+        # self.assertTrue(np.allclose(np.array([x0, x1, x2]), np.array([np.sqrt(2)] * 3)))
+        #
         x0, i0 = find_root_newton(fpoly, dfpoly, np.float64(-1.0))
         x1, i1 = find_root_newton(fpoly, dfpoly, np.float64(2.0))
         x2, i2 = find_root_newton(fpoly, dfpoly, np.float64(5.0))
@@ -87,7 +89,7 @@ class Tests(unittest.TestCase):
         self.assertTrue(np.allclose(reference, gradient))
         
     def test_6_gradient_descent_step(self):
-        model = "wave" #"cube", "moebius", "enneper"
+        model = "enneper" #"cube", "moebius", "enneper"
         v, f, c = load_object("data/" + model)
         #v, f, c = generate_cylinder(32, 12)
         eps = 1e-6

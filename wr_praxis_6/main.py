@@ -94,7 +94,11 @@ def find_root_newton(f: object, df: object, start: np.inexact, n_iters_max: int 
             return root, n_iters_max + 1
         # update root value and function/dfunction values
         root = root - fc / dfc
+        print("function value before")
+        print(fc)
         fc = f(root)
+        print("function value after")
+        print(fc)
         dfc = df(root)
         n_iterations += 1
         # avoid infinite loops and return (root, n_iters_max+1)
